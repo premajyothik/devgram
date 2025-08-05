@@ -20,7 +20,7 @@ class FirebaseAuthRepo implements AuthRepo {
       if (user != null) {
         DocumentSnapshot doc = await firebaseFirestore
             .collection('users')
-            .doc(user!.uid)
+            .doc(user.uid)
             .get();
         return AppUser(
           uid: user.uid,

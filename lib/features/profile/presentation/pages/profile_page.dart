@@ -48,7 +48,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           TextButton(
             onPressed: () {
-              print('postId :' + postId);
+              print('postId :$postId');
               postCubit.deletePost(postId);
               Navigator.pop(context);
             },

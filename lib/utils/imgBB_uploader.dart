@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:http/http.dart' as http;
-import 'package:path/path.dart';
 
 const API_Key = 'aa39c1586073b98405d158dfea23eb31';
 

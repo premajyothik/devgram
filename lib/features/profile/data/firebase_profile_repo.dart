@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:devgram/features/profile/domain/entities/profile_user.dart';
 import 'package:devgram/features/profile/domain/repo/profile_repo.dart';
-import 'package:devgram/features/profile/presentation/cubit/profile_state.dart';
 
 class FirebaseProfileRepo implements ProfileRepo {
   final FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;

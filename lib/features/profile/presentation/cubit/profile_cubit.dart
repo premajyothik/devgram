@@ -39,7 +39,7 @@ class ProfileCubit extends Cubit<ProfileState> {
         emit(ProfileError("Failed to fetch user profile"));
         return;
       }
-      print('imagePath:' + imagePath);
+      print('imagePath:$imagePath');
 
       if (imagePath.isEmpty) {
         return;

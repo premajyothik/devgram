@@ -18,11 +18,8 @@ dependencies:
   file_picker: ^10.2.1
   cached_network_image: ^3.4.1
   intl: ^0.20.2
-<<<<<<< HEAD
-=======
   http: ^1.4.0
   path: ^1.9.1
->>>>>>> ff6d37f (create post with image)
 
 dev_dependencies:
   flutter_test:

@@ -11,7 +11,7 @@ class PostCubit extends Cubit<PostStates> {
     try {
       emit(PostLoading());
       postRepo.createPost(post);
-      print('post : ' + post.text);
+      print('post : ${post.text}');
       fetchAllPosts();
     } catch (error) {
       emit(PostError(error.toString()));

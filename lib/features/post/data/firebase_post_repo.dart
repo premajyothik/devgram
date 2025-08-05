@@ -90,6 +90,7 @@ class FirebasePostRepo implements PostRepo {
     }
   }
 
+  @override
   Stream<List<Post>> postsStream() {
     return postsCollection
         .orderBy('timeStamp', descending: true)

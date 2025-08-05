@@ -25,11 +25,11 @@ class FirebaseStorageRepo implements StorageRepo {
   ) async {
     try {
       final ref = firebaseStorage.ref().child('users/$userId/$fileName');
-      print('ref : ' + ref.toString());
+      print('ref : $ref');
       final uploadTask = ref.putFile(File(filePath));
-      print('uploadTask : ' + uploadTask.toString());
+      print('uploadTask : $uploadTask');
       TaskSnapshot snapshot = await uploadTask;
-      print('snapshot : ' + snapshot.toString());
+      print('snapshot : $snapshot');
 
       final downloadUrl = await snapshot.ref.getDownloadURL();
       return downloadUrl;

@@ -1,5 +1,3 @@
-import 'package:flutter/widgets.dart';
-
 class AppUser {
   final String uid;
   final String email;

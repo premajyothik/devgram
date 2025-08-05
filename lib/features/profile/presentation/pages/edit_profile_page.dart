@@ -33,7 +33,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         : bioTextController.text;
     final imageFile = imagePickedFile?.path ?? "";
     if (newBio != null || imageFile != null) {
-      print('imageFile: ' + imageFile);
+      print('imageFile: $imageFile');
       context.read<ProfileCubit>().updateProfile(
         widget.profileUser.uid,
         newBio,
@@ -81,7 +81,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ),
           );
         } else if (state is ProfileError) {
-          print('error:' + state.errorMessage);
+          print('error:${state.errorMessage}');
           return ScaffoldMessenger(
             child: SnackBar(content: Text('Error: ${state.errorMessage}')),
           );

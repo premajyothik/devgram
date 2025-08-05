@@ -14,8 +14,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class UploadPostPage extends StatefulWidget {
   final Function(String message, String? imageUrl) onPostCreated;
 
-  const UploadPostPage({Key? key, required this.onPostCreated})
-    : super(key: key);
+  const UploadPostPage({super.key, required this.onPostCreated});
 
   @override
   State<UploadPostPage> createState() => _UploadPostPageState();
