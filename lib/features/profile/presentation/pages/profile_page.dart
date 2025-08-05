@@ -1,13 +1,14 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:devgram/features/auth/domain/entities/app_user.dart';
 import 'package:devgram/features/auth/presentation/cubits/auth_cubit.dart';
 import 'package:devgram/features/post/presentation/cubit/post_cubit.dart';
 import 'package:devgram/features/post/presentation/cubit/post_states.dart';
 import 'package:devgram/features/post/presentation/pages/post_tile.dart';
 import 'package:devgram/features/profile/presentation/components/box_bio.dart';
+import 'package:devgram/features/profile/presentation/components/profile_avatar.dart';
 import 'package:devgram/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:devgram/features/profile/presentation/cubit/profile_state.dart';
 import 'package:devgram/features/profile/presentation/pages/edit_profile_page.dart';
-import 'package:devgram/utils/avatar_color_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -30,6 +31,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     profileCubit.fetchUserProfile(widget.userId);
+    postCubit.fetchPostsByUserId(widget.userId);
   }
 
   void showDeleteOptions(String postId) {
@@ -96,24 +98,12 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   const SizedBox(height: 10),
                   Center(
-                    child: CircleAvatar(
+                    child: ProfileAvatar(
+                      name: profileUser.name,
+                      imageUrl: profileUser.profilePictureUrl,
                       radius: 50,
-                      backgroundColor: generateColorFromUsername(
-                        profileUser.name,
-                      ),
-                      child: Text(
-                        (profileUser.name.isEmpty == true)
-                            ? ''
-                            : profileUser.name[0].toUpperCase(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 35,
-                        ),
-                      ),
                     ),
                   ),
-                  SizedBox(height: 20),
                   Text(profileUser.email),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10.0),

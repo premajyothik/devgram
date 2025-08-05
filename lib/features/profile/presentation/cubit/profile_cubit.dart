@@ -1,7 +1,11 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:devgram/features/profile/domain/repo/profile_repo.dart';
 import 'package:devgram/features/profile/presentation/cubit/profile_state.dart';
 import 'package:devgram/features/storage/domain/repo/storage_repo.dart';
+import 'package:devgram/utils/imgBB_uploader.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:http/http.dart' as http;
 
 class ProfileCubit extends Cubit<ProfileState> {
   final ProfileRepo profileRepo;
@@ -37,12 +41,13 @@ class ProfileCubit extends Cubit<ProfileState> {
       }
       print('imagePath:' + imagePath);
 
-      if (imagePath.isNotEmpty) {
+      if (imagePath.isEmpty) {
+        return;
         // Upload the new profile picture
-
-        final uploadedImageUrl = await storageRepo.uploadImageFromMobile(
+        /*final uploadedImageUrl = await storageRepo.uploadImageFromMobile(
           imagePath,
           'profile_$uid.jpg',
+          uid,
         );
         if (uploadedImageUrl.isEmpty) {
           print('uploadedImageUrl:empty');
@@ -50,12 +55,13 @@ class ProfileCubit extends Cubit<ProfileState> {
           return;
         }
         imagePath = uploadedImageUrl;
-        print('uploadedImageUrl:' + uploadedImageUrl);
+        print('uploadedImageUrl:' + uploadedImageUrl);*/
       }
-      print('uploadedImageUrl nil:');
+      final uploadedImageUrl = await uploadImageToImgBB(imagePath);
+      print('uploadedImageUrl $uploadedImageUrl');
       final updatedProfile = user.copyWith(
         newBio: newBio,
-        newProfilePictureUrl: imagePath,
+        newProfilePictureUrl: uploadedImageUrl,
       );
       await profileRepo.updateProfile(updatedProfile);
       final profileUser = await profileRepo.fetchUserProfile(uid);
@@ -63,7 +69,12 @@ class ProfileCubit extends Cubit<ProfileState> {
         emit(ProfileLoaded(profileUser));
       }
     } catch (error) {
+      print('error profile image $error.toString()');
       emit(ProfileError(error.toString()));
     }
+  }
+
+  Future<String?> uploadImageToImgBB(String imagePath) async {
+    return await ImgBBUploader().uploadImageFile(imagePath);
   }
 }

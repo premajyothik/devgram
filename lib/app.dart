@@ -6,6 +6,7 @@ import 'package:devgram/features/home/presentation/pages/root_page.dart';
 import 'package:devgram/features/post/data/firebase_post_repo.dart';
 import 'package:devgram/features/post/presentation/cubit/post_cubit.dart';
 import 'package:devgram/features/profile/data/firebase_profile_repo.dart';
+import 'package:devgram/features/profile/presentation/cubit/Profilepic_cubit.dart';
 import 'package:devgram/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:devgram/features/storage/data/firebase_storage_repo.dart';
 import 'package:devgram/themes/light_mode.dart';
@@ -28,6 +29,9 @@ class MainApp extends StatelessWidget {
         ),
         BlocProvider<ProfileCubit>(
           create: (context) => ProfileCubit(profileRepo, storageRepo),
+        ),
+        BlocProvider<ProfilePicCubit>(
+          create: (context) => ProfilePicCubit(profileRepo),
         ),
         BlocProvider<PostCubit>(create: (context) => PostCubit(postRepo)),
       ],

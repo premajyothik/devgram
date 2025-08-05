@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:devgram/features/auth/domain/entities/app_user.dart';
 import 'package:devgram/features/auth/presentation/components/custom_textfiled.dart';
 import 'package:devgram/features/auth/presentation/components/my_button.dart';
@@ -5,114 +6,131 @@ import 'package:devgram/features/auth/presentation/cubits/auth_cubit.dart';
 import 'package:devgram/features/post/domain/entities/post.dart';
 import 'package:devgram/features/post/presentation/cubit/post_cubit.dart';
 import 'package:devgram/features/post/presentation/cubit/post_states.dart';
+import 'package:devgram/utils/imgBB_uploader.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class UploadPostPage extends StatefulWidget {
-  const UploadPostPage({super.key});
+  final Function(String message, String? imageUrl) onPostCreated;
+
+  const UploadPostPage({Key? key, required this.onPostCreated})
+    : super(key: key);
 
   @override
   State<UploadPostPage> createState() => _UploadPostPageState();
 }
 
 class _UploadPostPageState extends State<UploadPostPage> {
-  final TextEditingController postController = TextEditingController();
-  AppUser? currentUser;
+  final TextEditingController _messageController = TextEditingController();
+  PlatformFile? imagePickedFile;
+  bool _isUploading = false;
 
-  @override
-  void initState() {
-    super.initState();
-    getCurrentUser();
-  }
-
-  void getCurrentUser() {
-    // This method should be implemented to fetch the current user
-    // For now, we will just set a dummy user
-    final authCubit = context.read<AuthCubit>();
-    currentUser = authCubit.currentUser;
-  }
-
-  @override
-  void dispose() {
-    postController.dispose();
-    super.dispose();
-  }
-
-  void uploadPost() {
-    final postText = postController.text;
-    if (postText.isNotEmpty && currentUser != null) {
-      // Call your post upload service here
-      final newPost = Post(
-        id: DateTime.now().microsecondsSinceEpoch.toString(),
-        userId: currentUser!.uid,
-        userName: currentUser!.name,
-        timeStamp: DateTime.now(),
-        text: postText,
-      );
-      print(newPost.userName);
-      context.read<PostCubit>().createPost(newPost);
-      // After successful upload, you can navigate back or show a success message
+  Future<void> _pickImage() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      allowMultiple: false,
+    );
+    if (result != null && result.files.isNotEmpty) {
+      setState(() {
+        imagePickedFile = result.files.first;
+        print(imagePickedFile?.path.toString());
+      });
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please enter some text for the post'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('No image selected')));
     }
+  }
+
+  Future<void> _submitPost() async {
+    final message = _messageController.text.trim();
+
+    if (message.isEmpty && imagePickedFile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter text or pick an image.")),
+      );
+      return;
+    }
+
+    setState(() => _isUploading = true);
+
+    String? imageUrl;
+
+    if (imagePickedFile != null) {
+      final uploader = ImgBBUploader();
+      imageUrl = await uploader.uploadImageFile(imagePickedFile!.path ?? '');
+    }
+
+    widget.onPostCreated(message, imageUrl);
+
+    setState(() {
+      _isUploading = false;
+      _messageController.clear();
+      imagePickedFile = null;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<PostCubit, PostStates>(
-      builder: (context, state) {
-        if (state is PostLoading || state is PostUploading) {
-          return Scaffold(body: Center(child: CircularProgressIndicator()));
-        }
-        // else if (state is PostError) {
-        //   return Scaffold(
-        //     appBar: AppBar(title: Text('Create Post')),
-        //     body: Center(child: Text('Error: ${state.errorMessage}')),
-        //   );
-        // }
-        return buildUploadPage();
-      },
-      listener: (context, state) {
-        if (state is PostLoaded) {
-          Navigator.pop(context);
-        }
-      },
-    );
-  }
-
-  Widget buildUploadPage() {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Create Post'),
-        automaticallyImplyLeading: false,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+    return Card(
+      elevation: 3,
+      margin: const EdgeInsets.all(12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CustomTextField(
-              controller: postController,
-              hintText: "Add text",
-              obscureText: false,
-              numberOflines: 5,
+            TextField(
+              controller: _messageController,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                labelText: "Write something...",
+                border: OutlineInputBorder(),
+              ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 10),
+            if (imagePickedFile != null)
+              Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.file(
+                      File(imagePickedFile!.path!),
+                      width: double.infinity,
+                      height: 180,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  Positioned(
+                    top: 4,
+                    right: 4,
+                    child: IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: () {
+                        setState(() => imagePickedFile = null);
+                      },
+                    ),
+                  ),
+                ],
+              ),
             Row(
-              spacing: 20,
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                MyButton(onTap: uploadPost, text: 'Upload Post'),
-                MyButton(
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                  text: 'Cancel',
+                TextButton.icon(
+                  onPressed: _pickImage,
+                  icon: const Icon(Icons.image),
+                  label: const Text("Add Image"),
+                ),
+                ElevatedButton(
+                  onPressed: _isUploading ? null : _submitPost,
+                  child: _isUploading
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text("Post"),
                 ),
               ],
             ),

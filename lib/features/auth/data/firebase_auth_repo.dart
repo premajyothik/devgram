@@ -80,13 +80,20 @@ class FirebaseAuthRepo implements AuthRepo {
   @override
   Future<AppUser?> getCurrentUser() async {
     final firebaseUser = firebaseAuth.currentUser;
+
     if (firebaseUser == null) {
       return null;
     }
-    return AppUser(
+    DocumentSnapshot doc = await firebaseFirestore
+        .collection("users")
+        .doc(firebaseUser.uid)
+        .get();
+
+    final appUser = AppUser(
       uid: firebaseUser.uid,
       email: firebaseUser.email ?? '',
-      name: firebaseUser.displayName ?? '',
+      name: doc['name'] ?? '',
     );
+    return appUser;
   }
 }

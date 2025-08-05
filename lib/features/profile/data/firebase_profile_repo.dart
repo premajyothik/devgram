@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:devgram/features/profile/domain/entities/profile_user.dart';
 import 'package:devgram/features/profile/domain/repo/profile_repo.dart';
+import 'package:devgram/features/profile/presentation/cubit/profile_state.dart';
 
 class FirebaseProfileRepo implements ProfileRepo {
   final FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
@@ -44,5 +45,25 @@ class FirebaseProfileRepo implements ProfileRepo {
       // Handle exceptions
       throw Exception('Failed to update profile: $error');
     }
+  }
+
+  @override
+  Future<String?> fetchUserProfilePic(String userId) async {
+    // TODO: implement fetchUserProfilePic
+    try {
+      final userDoc = await firebaseFirestore
+          .collection("users")
+          .doc(userId)
+          .get();
+      if (userDoc.exists) {
+        final user = userDoc.data();
+        return user?['profilePictureUrl'] ?? '';
+      }
+      return '';
+    } catch (error) {
+      // Handle exceptions
+      throw Exception('Failed to get profile pic: $error');
+    }
+    // Ensure a non-nullable String is always returned
   }
 }

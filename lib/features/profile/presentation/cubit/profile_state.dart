@@ -11,6 +11,14 @@ class ProfileLoaded extends ProfileState {
   ProfileLoaded(this.profileUser);
 }
 
+class ProfileImageLoaded extends ProfileState {
+  final String userId;
+  final String profilePic;
+  ProfileImageLoaded(this.userId, this.profilePic);
+}
+
+class ProfileImageLoading extends ProfileState {}
+
 class ProfileError extends ProfileState {
   final String errorMessage;
   ProfileError(this.errorMessage);

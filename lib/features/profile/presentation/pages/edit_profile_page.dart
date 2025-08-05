@@ -39,13 +39,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
         newBio,
         imageFile,
       );
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Bio cannot be empty')));
+      return;
     }
-    // else {
-    //   ScaffoldMessenger.of(
-    //     context,
-    //   ).showSnackBar(SnackBar(content: Text('Bio cannot be empty')));
-    //   return;
-    // }
   }
 
   Future<void> pickImage() async {
@@ -135,16 +134,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         width: 200,
                         height: 200,
                       )
-                    : CachedNetworkImage(
-                        imageUrl: widget.profileUser.profilePictureUrl,
-                        placeholder: (context, url) => Icon(
-                          Icons.person,
-                          size: 100,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        imageBuilder: (context, imageProvider) =>
-                            Image(image: imageProvider, fit: BoxFit.cover),
-                      ),
+                    : buildProfileImage(widget.profileUser.profilePictureUrl),
               ),
             ),
             Center(
@@ -164,6 +154,26 @@ class _EditProfilePageState extends State<EditProfilePage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget buildProfileImage(String? imageUrl) {
+    print(imageUrl);
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return Icon(Icons.person, size: 100, color: Colors.grey);
+    }
+
+    return CachedNetworkImage(
+      imageUrl: imageUrl,
+      placeholder: (context, url) => Icon(
+        Icons.person,
+        size: 100,
+        color: Theme.of(context).colorScheme.primary,
+      ),
+      errorWidget: (context, url, error) =>
+          Icon(Icons.error, size: 100, color: Colors.red),
+      imageBuilder: (context, imageProvider) =>
+          Image(image: imageProvider, fit: BoxFit.cover),
     );
   }
 }

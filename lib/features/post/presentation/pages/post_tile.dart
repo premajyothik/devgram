@@ -1,7 +1,11 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:devgram/features/auth/domain/entities/app_user.dart';
-import 'package:devgram/features/auth/presentation/cubits/auth_cubit.dart';
 import 'package:devgram/features/post/domain/entities/post.dart';
 import 'package:devgram/features/post/presentation/cubit/post_cubit.dart';
+import 'package:devgram/features/profile/presentation/components/profile_avatar.dart';
+import 'package:devgram/features/profile/presentation/cubit/Profilepic_cubit.dart';
+import 'package:devgram/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:devgram/features/profile/presentation/cubit/profile_state.dart';
 import 'package:devgram/utils/avatar_color_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,9 +27,9 @@ class PostTile extends StatefulWidget {
 }
 
 class _PostTileState extends State<PostTile> {
+  late final ProfilePicCubit _profilePicCubit;
+
   bool isLikedBy() {
-    // final currentUser = context.read<AuthCubit>().currentUser;
-    print(widget.post!.likeBy?.contains(widget.currentUser.uid));
     return widget.post!.likeBy?.contains(widget.currentUser.uid) == true
         ? true
         : false;
@@ -56,6 +60,13 @@ class _PostTileState extends State<PostTile> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _profilePicCubit = context.read<ProfilePicCubit>();
+    _profilePicCubit.fetchUserProfilePic(widget.post!.userId);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final formattedDate = widget.post?.timeStamp != null
         ? DateFormat('hh:mm a • dd MMM').format(widget.post!.timeStamp)
@@ -73,41 +84,54 @@ class _PostTileState extends State<PostTile> {
             // Row: Avatar + Name + Date
             Row(
               children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: generateColorFromUsername(
-                    widget.post?.userName ?? '',
-                  ),
-                  child: Text(
-                    (widget.post?.userName?.isEmpty == true)
-                        ? ''
-                        : widget.post?.userName?[0].toUpperCase() ?? '',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                BlocBuilder<ProfilePicCubit, ProfileState>(
+                  builder: (context, state) {
+                    final imageUrl =
+                        (state is ProfileImageLoaded &&
+                            state.userId == widget.post!.userId)
+                        ? state.profilePic
+                        : '';
+                    return ProfileAvatar(
+                      name: widget.post?.userName ?? '',
+                      imageUrl: imageUrl,
+                      radius: 20,
+                    );
+                  },
                 ),
+
                 const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    widget.post?.userName ?? '',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
+                Text(
+                  widget.post?.userName ?? '',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                Flexible(
-                  child: Text(
-                    formattedDate,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                  ),
+                Spacer(),
+                Text(
+                  formattedDate,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
               ],
             ),
 
             const SizedBox(height: 12),
-
+            if (widget.post?.imageUrl != null &&
+                widget.post?.imageUrl?.isNotEmpty == true)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: CachedNetworkImage(
+                  imageUrl: widget.post!.imageUrl ?? '',
+                  placeholder: (context, url) =>
+                      const Center(child: CircularProgressIndicator()),
+                  errorWidget: (context, url, error) => const Icon(
+                    Icons.broken_image,
+                    size: 80,
+                    color: Colors.grey,
+                  ),
+                  fit: BoxFit.cover,
+                ),
+              ),
             // Message
+            const SizedBox(height: 12),
             Text(widget.post?.text ?? '', style: const TextStyle(fontSize: 16)),
 
             const SizedBox(height: 12),
@@ -117,16 +141,18 @@ class _PostTileState extends State<PostTile> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
+                  spacing: 5,
                   children: [
-                    IconButton(
-                      icon: Icon(
+                    GestureDetector(
+                      onDoubleTap: toggleLike,
+                      child: Icon(
                         isLikedBy() == true
                             ? Icons.favorite
                             : Icons.favorite_border,
                         color: isLikedBy() == true ? Colors.red : Colors.grey,
                       ),
-                      onPressed: toggleLike,
                     ),
+                    Text((widget.post?.likeBy?.length ?? 0).toString()),
                   ],
                 ),
                 if (widget.post?.userId == widget.currentUser.uid)
