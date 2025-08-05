@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "464151302054",
+    "project_id": "test-devgram",
+    "storage_bucket": "test-devgram.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:464151302054:android:92e635b706d9770cbc8967",
+        "android_client_info": {
+          "package_name": "com.example.devgram"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcY2Y4Afv4gpoqVs7gCaFCJrpSVePFV1o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
