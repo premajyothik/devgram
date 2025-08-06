@@ -83,6 +83,13 @@ class _PostTileState extends State<PostTile> {
             Row(
               children: [
                 BlocBuilder<ProfilePicCubit, ProfileState>(
+                  buildWhen: (previous, current) {
+                    if (current is ProfileImageLoaded &&
+                        current.userId == widget.post!.userId) {
+                      return true;
+                    }
+                    return false;
+                  },
                   builder: (context, state) {
                     final imageUrl =
                         (state is ProfileImageLoaded &&

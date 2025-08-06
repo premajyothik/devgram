@@ -61,78 +61,80 @@ class _SignupPageState extends State<SignupPage> {
     return Scaffold(
       body: SafeArea(
         child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.lock_open_rounded, size: 100, color: Colors.black),
-                const SizedBox(height: 30),
-                Text(
-                  'Let\'s create your account! ',
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.lock_open_rounded, size: 100, color: Colors.black),
+                  const SizedBox(height: 30),
+                  Text(
+                    'Let\'s create your account! ',
 
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(height: 25),
-                //Name TextField
-                CustomTextField(
-                  controller: nameController,
-                  hintText: "Name",
-                  obscureText: false,
-                ),
-                const SizedBox(height: 25),
-                //Email TextField
-                CustomTextField(
-                  controller: emailController,
-                  hintText: "Email",
-                  obscureText: false,
-                ),
-                const SizedBox(height: 25),
-                CustomTextField(
-                  controller: passwordController,
-                  hintText: "Password",
-                  obscureText: true,
-                ),
-                const SizedBox(height: 25),
-                CustomTextField(
-                  controller: confirmPasswordController,
-                  hintText: "Confirm Password",
-                  obscureText: true,
-                ),
-                const SizedBox(height: 25),
-                //Signup Button
-                MyButton(onTap: signUp, text: "Sign up"),
-                const SizedBox(height: 35),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Already a member?",
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontSize: 15,
-                      ),
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
-                    GestureDetector(
-                      onTap: widget.togglePage,
-                      child: Text(
-                        " Login now!",
+                  ),
+                  const SizedBox(height: 25),
+                  //Name TextField
+                  CustomTextField(
+                    controller: nameController,
+                    hintText: "Name",
+                    obscureText: false,
+                  ),
+                  const SizedBox(height: 25),
+                  //Email TextField
+                  CustomTextField(
+                    controller: emailController,
+                    hintText: "Email",
+                    obscureText: false,
+                  ),
+                  const SizedBox(height: 25),
+                  CustomTextField(
+                    controller: passwordController,
+                    hintText: "Password",
+                    obscureText: true,
+                  ),
+                  const SizedBox(height: 25),
+                  CustomTextField(
+                    controller: confirmPasswordController,
+                    hintText: "Confirm Password",
+                    obscureText: true,
+                  ),
+                  const SizedBox(height: 25),
+                  //Signup Button
+                  MyButton(onTap: signUp, text: "Sign up"),
+                  const SizedBox(height: 35),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Already a member?",
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.inversePrimary,
+                          color: Theme.of(context).colorScheme.primary,
                           fontSize: 15,
-                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                      GestureDetector(
+                        onTap: widget.togglePage,
+                        child: Text(
+                          " Login now!",
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.inversePrimary,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
 
-                //Sign Up Button
-              ],
+                  //Sign Up Button
+                ],
+              ),
             ),
           ),
         ),

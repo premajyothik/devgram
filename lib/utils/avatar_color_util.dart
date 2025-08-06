@@ -12,5 +12,5 @@ Color generateColorFromUsername(String username) {
     Colors.indigo,
     Colors.deepOrange,
   ];
-  return colors[hash % colors.length];
+  return colors[hash % colors.length - 1];
 }

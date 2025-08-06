@@ -83,7 +83,6 @@ class _LoginPageState extends State<LoginPage> {
                 MyButton(
                   onTap: () {
                     login();
-                    print("Login button pressed");
                   },
                   text: "Login",
                 ),

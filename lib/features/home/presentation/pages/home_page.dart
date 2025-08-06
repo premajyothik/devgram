@@ -84,11 +84,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     child: SizedBox(
                       width: MediaQuery.of(context).size.width * 0.8,
-                      height: MediaQuery.of(context).size.height * 0.6,
+                      height: MediaQuery.of(context).size.height * 0.5,
                       child: UploadPostPage(
                         onPostCreated: (message, imageUrl) {
                           final user = currentUser();
-                          print('post imageurl : $imageUrl ');
+                          //print('post imageurl : $imageUrl ');
                           final newPost = Post(
                             id: DateTime.now().microsecondsSinceEpoch
                                 .toString(),

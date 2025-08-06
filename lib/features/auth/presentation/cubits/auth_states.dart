@@ -1,6 +1,10 @@
 import 'package:devgram/features/auth/domain/entities/app_user.dart';
+import 'package:equatable/equatable.dart';
 
-abstract class AuthStates {}
+abstract class AuthStates extends Equatable {
+  @override
+  List<Object?> get props => [];
+}
 
 // intial
 class AuthInitial extends AuthStates {}
@@ -12,6 +16,8 @@ class AuthLoading extends AuthStates {}
 class Authenticated extends AuthStates {
   final AppUser appUser;
   Authenticated(this.appUser);
+  @override
+  List<Object?> get props => [appUser];
 }
 
 // unauthenticated
@@ -21,4 +27,6 @@ class Unauthenticated extends AuthStates {}
 class AuthError extends AuthStates {
   final String errorMessage;
   AuthError(this.errorMessage);
+  @override
+  List<Object?> get props => [errorMessage];
 }

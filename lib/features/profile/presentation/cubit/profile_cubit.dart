@@ -1,11 +1,8 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:devgram/features/profile/domain/repo/profile_repo.dart';
 import 'package:devgram/features/profile/presentation/cubit/profile_state.dart';
 import 'package:devgram/features/storage/domain/repo/storage_repo.dart';
 import 'package:devgram/utils/imgBB_uploader.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart' as http;
 
 class ProfileCubit extends Cubit<ProfileState> {
   final ProfileRepo profileRepo;
@@ -40,24 +37,10 @@ class ProfileCubit extends Cubit<ProfileState> {
         return;
       }
       print('imagePath:$imagePath');
-
-      if (imagePath.isEmpty) {
-        return;
-        // Upload the new profile picture
-        /*final uploadedImageUrl = await storageRepo.uploadImageFromMobile(
-          imagePath,
-          'profile_$uid.jpg',
-          uid,
-        );
-        if (uploadedImageUrl.isEmpty) {
-          print('uploadedImageUrl:empty');
-          emit(ProfileError("Failed to upload profile picture"));
-          return;
-        }
-        imagePath = uploadedImageUrl;
-        print('uploadedImageUrl:' + uploadedImageUrl);*/
+      String? uploadedImageUrl = '';
+      if (imagePath.isNotEmpty) {
+        uploadedImageUrl = await uploadImageToImgBB(imagePath);
       }
-      final uploadedImageUrl = await uploadImageToImgBB(imagePath);
       print('uploadedImageUrl $uploadedImageUrl');
       final updatedProfile = user.copyWith(
         newBio: newBio,

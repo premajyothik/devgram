@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:devgram/features/post/domain/entities/post.dart';
 import 'package:devgram/features/post/domain/repo/post_repo.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 class FirebasePostRepo implements PostRepo {
   final FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;

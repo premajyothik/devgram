@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:devgram/features/auth/domain/entities/app_user.dart';
 import 'package:devgram/features/auth/presentation/cubits/auth_cubit.dart';
 import 'package:devgram/features/post/presentation/cubit/post_cubit.dart';
@@ -9,6 +8,7 @@ import 'package:devgram/features/profile/presentation/components/profile_avatar.
 import 'package:devgram/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:devgram/features/profile/presentation/cubit/profile_state.dart';
 import 'package:devgram/features/profile/presentation/pages/edit_profile_page.dart';
+import 'package:devgram/utils/logout-dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -87,7 +87,12 @@ class _ProfilePageState extends State<ProfilePage> {
                 IconButton(
                   icon: const Icon(Icons.logout),
                   onPressed: () {
-                    authCubit.logout();
+                    LogoutDialog(
+                      context: context,
+                      onLogoutConfirmed: () {
+                        authCubit.logout();
+                      },
+                    );
                   },
                 ),
               ],

@@ -1,5 +1,4 @@
 import 'package:devgram/features/auth/domain/entities/app_user.dart';
-import 'package:flutter/material.dart';
 
 class ProfileUser extends AppUser {
   final String bio;

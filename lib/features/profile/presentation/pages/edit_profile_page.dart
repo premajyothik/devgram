@@ -32,7 +32,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ? null
         : bioTextController.text;
     final imageFile = imagePickedFile?.path ?? "";
-    if (newBio != null || imageFile != null) {
+    if (newBio != null || imageFile.isNotEmpty) {
       print('imageFile: $imageFile');
       context.read<ProfileCubit>().updateProfile(
         widget.profileUser.uid,
@@ -48,7 +48,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   Future<void> pickImage() async {
-    print('result llll');
     final result = await FilePicker.platform.pickFiles(
       type: FileType.image,
       allowMultiple: false,
@@ -93,6 +92,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
       listener: (context, state) {
         if (state is ProfileLoaded) {
           Navigator.pop(context);
+        } else if (state is ProfileError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: ${state.errorMessage}')),
+          );
         }
       },
     );

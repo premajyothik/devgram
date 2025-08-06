@@ -1,15 +1,7 @@
 import 'dart:io';
-import 'package:devgram/features/auth/domain/entities/app_user.dart';
-import 'package:devgram/features/auth/presentation/components/custom_textfiled.dart';
-import 'package:devgram/features/auth/presentation/components/my_button.dart';
-import 'package:devgram/features/auth/presentation/cubits/auth_cubit.dart';
-import 'package:devgram/features/post/domain/entities/post.dart';
-import 'package:devgram/features/post/presentation/cubit/post_cubit.dart';
-import 'package:devgram/features/post/presentation/cubit/post_states.dart';
 import 'package:devgram/utils/imgBB_uploader.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class UploadPostPage extends StatefulWidget {
   final Function(String message, String? imageUrl) onPostCreated;
@@ -17,13 +9,13 @@ class UploadPostPage extends StatefulWidget {
   const UploadPostPage({super.key, required this.onPostCreated});
 
   @override
-  State<UploadPostPage> createState() => _UploadPostPageState();
+  State<UploadPostPage> createState() => UploadPostPageState();
 }
 
-class _UploadPostPageState extends State<UploadPostPage> {
+class UploadPostPageState extends State<UploadPostPage> {
   final TextEditingController _messageController = TextEditingController();
   PlatformFile? imagePickedFile;
-  bool _isUploading = false;
+  bool isUploading = false;
 
   Future<void> _pickImage() async {
     final result = await FilePicker.platform.pickFiles(
@@ -52,7 +44,7 @@ class _UploadPostPageState extends State<UploadPostPage> {
       return;
     }
 
-    setState(() => _isUploading = true);
+    setState(() => isUploading = true);
 
     String? imageUrl;
 
@@ -64,10 +56,11 @@ class _UploadPostPageState extends State<UploadPostPage> {
     widget.onPostCreated(message, imageUrl);
 
     setState(() {
-      _isUploading = false;
+      isUploading = false;
       _messageController.clear();
       imagePickedFile = null;
     });
+    Navigator.pop(context);
   }
 
   @override
@@ -113,6 +106,7 @@ class _UploadPostPageState extends State<UploadPostPage> {
                   ),
                 ],
               ),
+            SizedBox(height: 15),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -122,14 +116,15 @@ class _UploadPostPageState extends State<UploadPostPage> {
                   label: const Text("Add Image"),
                 ),
                 ElevatedButton(
-                  onPressed: _isUploading ? null : _submitPost,
-                  child: _isUploading
+                  onPressed: isUploading ? null : _submitPost,
+
+                  child: isUploading
                       ? const SizedBox(
                           width: 16,
                           height: 16,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text("Post"),
+                      : Text("Post"),
                 ),
               ],
             ),
