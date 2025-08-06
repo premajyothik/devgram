@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:io' as io;
+import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:devgram/features/auth/presentation/components/custom_textfiled.dart';
@@ -6,6 +8,7 @@ import 'package:devgram/features/profile/domain/entities/profile_user.dart';
 import 'package:devgram/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:devgram/features/profile/presentation/cubit/profile_state.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -26,18 +29,25 @@ class _EditProfilePageState extends State<EditProfilePage> {
     super.dispose();
   }
 
-  void save() {
+  void save() async {
     // Save the profile changes
     final newBio = bioTextController.text.isEmpty
         ? null
         : bioTextController.text;
     final imageFile = imagePickedFile?.path ?? "";
-    if (newBio != null || imageFile.isNotEmpty) {
-      print('imageFile: $imageFile');
+    Uint8List? imageBytes;
+
+    if (kIsWeb) {
+      imageBytes = imagePickedFile?.bytes;
+    } else {
+      imageBytes = await io.File(imageFile).readAsBytes();
+    }
+    if (newBio != null || imageBytes != null) {
+      // print('imageFile: $imageFile');
       context.read<ProfileCubit>().updateProfile(
         widget.profileUser.uid,
         newBio,
-        imageFile,
+        imageBytes,
       );
     } else {
       ScaffoldMessenger.of(
@@ -52,12 +62,24 @@ class _EditProfilePageState extends State<EditProfilePage> {
       type: FileType.image,
       allowMultiple: false,
     );
-    print('result $result');
     if (result != null && result.files.isNotEmpty) {
-      setState(() {
-        imagePickedFile = result.files.first;
-        print(imagePickedFile?.path.toString());
-      });
+      final pickedFile = result.files.first;
+      Uint8List? imageBytes = pickedFile.bytes;
+      if (imageBytes != null) {
+        setState(() {
+          imagePickedFile = pickedFile; // Save for later use if needed
+        });
+        // print('Picked image name (web): ${pickedFile.name}');
+      } else {
+        // On mobile/desktop, use file path
+        String? filePath = pickedFile.path;
+        if (filePath != null) {
+          setState(() {
+            imagePickedFile = pickedFile;
+          });
+          print('Picked image path: $filePath');
+        }
+      }
     } else {
       ScaffoldMessenger.of(
         context,
@@ -131,12 +153,19 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ),
                 clipBehavior: Clip.hardEdge,
                 child: imagePickedFile != null
-                    ? Image.file(
-                        File(imagePickedFile!.path!),
-                        fit: BoxFit.cover,
-                        width: 200,
-                        height: 200,
-                      )
+                    ? (kIsWeb
+                          ? Image.memory(
+                              imagePickedFile!.bytes!,
+                              fit: BoxFit.cover,
+                              width: 200,
+                              height: 200,
+                            )
+                          : Image.file(
+                              File(imagePickedFile!.path!),
+                              fit: BoxFit.cover,
+                              width: 200,
+                              height: 200,
+                            ))
                     : buildProfileImage(widget.profileUser.profilePictureUrl),
               ),
             ),

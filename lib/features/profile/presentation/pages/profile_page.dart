@@ -92,7 +92,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       onLogoutConfirmed: () {
                         authCubit.logout();
                       },
-                    );
+                    ).show();
                   },
                 ),
               ],

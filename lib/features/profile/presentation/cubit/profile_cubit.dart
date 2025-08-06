@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:devgram/features/profile/domain/repo/profile_repo.dart';
 import 'package:devgram/features/profile/presentation/cubit/profile_state.dart';
 import 'package:devgram/features/storage/domain/repo/storage_repo.dart';
@@ -26,7 +28,7 @@ class ProfileCubit extends Cubit<ProfileState> {
   Future<void> updateProfile(
     String uid,
     String? newBio,
-    String imagePath,
+    Uint8List? imageBytes,
   ) async {
     try {
       print('enterd updateProfile');
@@ -36,12 +38,12 @@ class ProfileCubit extends Cubit<ProfileState> {
         emit(ProfileError("Failed to fetch user profile"));
         return;
       }
-      print('imagePath:$imagePath');
+      //print('imagePath:$imagePath');
       String? uploadedImageUrl = '';
-      if (imagePath.isNotEmpty) {
-        uploadedImageUrl = await uploadImageToImgBB(imagePath);
+      if (imageBytes != null) {
+        uploadedImageUrl = await uploadImageToImgBB(imageBytes);
+        print('uploadedImageUrl $uploadedImageUrl');
       }
-      print('uploadedImageUrl $uploadedImageUrl');
       final updatedProfile = user.copyWith(
         newBio: newBio,
         newProfilePictureUrl: uploadedImageUrl,
@@ -57,7 +59,7 @@ class ProfileCubit extends Cubit<ProfileState> {
     }
   }
 
-  Future<String?> uploadImageToImgBB(String imagePath) async {
-    return await ImgBBUploader().uploadImageFile(imagePath);
+  Future<String?> uploadImageToImgBB(Uint8List imageBytes) async {
+    return await ImgBBUploader().uploadImageFile(imageBytes);
   }
 }

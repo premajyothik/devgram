@@ -70,104 +70,107 @@ class _PostTileState extends State<PostTile> {
         ? DateFormat('hh:mm a • dd MMM').format(widget.post!.timeStamp)
         : '';
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Row: Avatar + Name + Date
-            Row(
-              children: [
-                BlocBuilder<ProfilePicCubit, ProfileState>(
-                  buildWhen: (previous, current) {
-                    if (current is ProfileImageLoaded &&
-                        current.userId == widget.post!.userId) {
-                      return true;
-                    }
-                    return false;
-                  },
-                  builder: (context, state) {
-                    final imageUrl =
-                        (state is ProfileImageLoaded &&
-                            state.userId == widget.post!.userId)
-                        ? state.profilePic
-                        : '';
-                    return ProfileAvatar(
-                      name: widget.post?.userName ?? '',
-                      imageUrl: imageUrl,
-                      radius: 20,
-                    );
-                  },
-                ),
-
-                const SizedBox(width: 10),
-                Text(
-                  widget.post?.userName ?? '',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Spacer(),
-                Text(
-                  formattedDate,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-            if (widget.post?.imageUrl != null &&
-                widget.post?.imageUrl?.isNotEmpty == true)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: CachedNetworkImage(
-                  imageUrl: widget.post!.imageUrl ?? '',
-                  placeholder: (context, url) =>
-                      const Center(child: CircularProgressIndicator()),
-                  errorWidget: (context, url, error) => const Icon(
-                    Icons.broken_image,
-                    size: 80,
-                    color: Colors.grey,
+    return GestureDetector(
+      onDoubleTap: toggleLike,
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        elevation: 3,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Row: Avatar + Name + Date
+              Row(
+                children: [
+                  BlocBuilder<ProfilePicCubit, ProfileState>(
+                    buildWhen: (previous, current) {
+                      if (current is ProfileImageLoaded &&
+                          current.userId == widget.post!.userId) {
+                        return true;
+                      }
+                      return false;
+                    },
+                    builder: (context, state) {
+                      final imageUrl =
+                          (state is ProfileImageLoaded &&
+                              state.userId == widget.post!.userId)
+                          ? state.profilePic
+                          : '';
+                      return ProfileAvatar(
+                        name: widget.post?.userName ?? '',
+                        imageUrl: imageUrl,
+                        radius: 20,
+                      );
+                    },
                   ),
-                  fit: BoxFit.cover,
-                ),
+
+                  const SizedBox(width: 10),
+                  Text(
+                    widget.post?.userName ?? '',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Spacer(),
+                  Text(
+                    formattedDate,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                ],
               ),
-            // Message
-            const SizedBox(height: 12),
-            Text(widget.post?.text ?? '', style: const TextStyle(fontSize: 16)),
 
-            const SizedBox(height: 12),
+              const SizedBox(height: 12),
+              if (widget.post?.imageUrl != null &&
+                  widget.post?.imageUrl?.isNotEmpty == true)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: CachedNetworkImage(
+                    imageUrl: widget.post!.imageUrl ?? '',
+                    placeholder: (context, url) =>
+                        const Center(child: CircularProgressIndicator()),
+                    errorWidget: (context, url, error) => const Icon(
+                      Icons.broken_image,
+                      size: 80,
+                      color: Colors.grey,
+                    ),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              // Message
+              const SizedBox(height: 12),
+              Text(
+                widget.post?.text ?? '',
+                style: const TextStyle(fontSize: 16),
+              ),
 
-            // Row: Like + Delete
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  spacing: 5,
-                  children: [
-                    GestureDetector(
-                      onDoubleTap: toggleLike,
-                      child: Icon(
+              const SizedBox(height: 12),
+
+              // Row: Like + Delete
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    spacing: 5,
+                    children: [
+                      Icon(
                         isLikedBy() == true
                             ? Icons.favorite
                             : Icons.favorite_border,
                         color: isLikedBy() == true ? Colors.red : Colors.grey,
                       ),
-                    ),
-                    Text((widget.post?.likeBy?.length ?? 0).toString()),
-                  ],
-                ),
-                if (widget.post?.userId == widget.currentUser.uid)
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline),
-                    onPressed: widget.onDelete,
+                      Text((widget.post?.likeBy?.length ?? 0).toString()),
+                    ],
                   ),
-              ],
-            ),
-          ],
+                  if (widget.post?.userId == widget.currentUser.uid)
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline),
+                      onPressed: widget.onDelete,
+                    ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

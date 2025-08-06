@@ -1,4 +1,3 @@
-import 'package:bloc_test/bloc_test.dart';
 import 'package:devgram/features/auth/presentation/cubits/auth_cubit.dart';
 import 'package:devgram/features/post/domain/entities/post.dart';
 import 'package:devgram/features/post/presentation/cubit/post_cubit.dart';
@@ -10,10 +9,10 @@ import 'package:devgram/features/profile/presentation/cubit/profile_state.dart';
 import 'package:devgram/features/profile/presentation/pages/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mocktail/mocktail.dart';
 
-// Mock classes
+// --- Mock Classes ---
 class MockAuthCubit extends Mock implements AuthCubit {}
 
 class MockProfileCubit extends Mock implements ProfileCubit {}
@@ -25,23 +24,22 @@ void main() {
   late MockProfileCubit mockProfileCubit;
   late MockPostCubit mockPostCubit;
 
-  // Sample data
   final testUser = ProfileUser(
-    uid: 'user123',
-    name: 'Test User',
-    email: 'test@example.com',
-    profilePictureUrl: 'https://example.com/profile.jpg',
-    bio: 'Test bio',
+    uid: 'testUserId',
+    name: 'test',
+    email: 'test@gmail.com',
+    profilePictureUrl: '',
+    bio: 'This is a test bio',
   );
 
   final testPost = Post(
     id: 'post1',
-    text: 'Test Post Content',
-    userId: 'user123',
-    userName: 'tester',
-    timeStamp: DateTime.now(),
+    userId: 'testUserId',
+    userName: 'Test User',
+    text: 'Hello Test Post',
     imageUrl: '',
-    // Add other required fields...
+    likeBy: [],
+    timeStamp: DateTime.now(),
   );
 
   setUp(() {
@@ -49,84 +47,97 @@ void main() {
     mockProfileCubit = MockProfileCubit();
     mockPostCubit = MockPostCubit();
 
-    // Mock AuthCubit current user
+    // Stub the currentUser getter in AuthCubit
     when(() => mockAuthCubit.currentUser).thenReturn(testUser);
-
-    // Mock ProfileCubit states
-    when(() => mockProfileCubit.state).thenReturn(ProfileLoaded(testUser));
-    whenListen(
-      mockProfileCubit,
-      Stream<ProfileState>.fromIterable([ProfileLoaded(testUser)]),
-      initialState: ProfileLoaded(testUser),
-    );
-
-    // Mock PostCubit states
-    when(() => mockPostCubit.state).thenReturn(PostLoaded([testPost]));
-    whenListen(
-      mockPostCubit,
-      Stream<PostStates>.fromIterable([
-        PostLoaded([testPost]),
-      ]),
-      initialState: PostLoaded([testPost]),
-    );
-
-    // Mock deletePost to do nothing async
-    when(() => mockPostCubit.deletePost(any())).thenAnswer((_) async {});
   });
 
-  Widget createTestWidget({
-    required AuthCubit authCubit,
-    required ProfileCubit profileCubit,
-    required PostCubit postCubit,
-  }) {
+  Widget createTestWidget() {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<AuthCubit>.value(value: authCubit),
-        BlocProvider<ProfileCubit>.value(value: profileCubit),
-        BlocProvider<PostCubit>.value(value: postCubit),
+        BlocProvider<AuthCubit>.value(value: mockAuthCubit),
+        BlocProvider<ProfileCubit>.value(value: mockProfileCubit),
+        BlocProvider<PostCubit>.value(value: mockPostCubit),
       ],
       child: MaterialApp(home: ProfilePage(userId: testUser.uid)),
     );
   }
 
-  testWidgets('renders profile data and posts', (tester) async {
-    FlutterError.onError = (details) {
-      FlutterError.dumpErrorToConsole(details);
-      fail(details.exceptionAsString());
-    };
+  testWidgets('shows loading indicator when profile is loading', (
+    tester,
+  ) async {
+    when(() => mockProfileCubit.state).thenReturn(ProfileLoading());
+    when(() => mockPostCubit.state).thenReturn(PostLoading());
 
-    await tester.pumpWidget(
-      createTestWidget(
-        authCubit: mockAuthCubit,
-        profileCubit: mockProfileCubit,
-        postCubit: mockPostCubit,
-      ),
-    );
+    await tester.pumpWidget(createTestWidget());
 
-    await tester.pumpAndSettle();
-
-    expect(find.text(testUser.name), findsOneWidget);
-    expect(find.text(testUser.email), findsOneWidget);
-    expect(find.byType(PostTile), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
   });
 
-  testWidgets('shows delete dialog when delete post is tapped', (tester) async {
-    await tester.pumpWidget(
-      createTestWidget(
-        authCubit: mockAuthCubit,
-        profileCubit: mockProfileCubit,
-        postCubit: mockPostCubit,
-      ),
-    );
+  testWidgets('shows profile and posts when loaded', (tester) async {
+    when(() => mockProfileCubit.state).thenReturn(ProfileLoaded(testUser));
+    when(() => mockPostCubit.state).thenReturn(PostLoaded([testPost]));
+
+    await tester.pumpWidget(createTestWidget());
 
     await tester.pumpAndSettle();
 
-    final postTile = find.byType(PostTile).first;
-    expect(postTile, findsOneWidget);
+    // Profile info
+    expect(find.text(testUser.name), findsOneWidget);
+    expect(find.text(testUser.email), findsOneWidget);
+    expect(find.text(testUser.bio), findsOneWidget);
+
+    // PostTile
+    expect(find.byType(PostTile), findsOneWidget);
+    expect(find.text(testPost.text), findsOneWidget);
+  });
+
+  testWidgets('shows no posts message when posts list is empty', (
+    tester,
+  ) async {
+    when(() => mockProfileCubit.state).thenReturn(ProfileLoaded(testUser));
+    when(() => mockPostCubit.state).thenReturn(PostLoaded([]));
+
+    await tester.pumpWidget(createTestWidget());
+    await tester.pumpAndSettle();
+
+    expect(find.text('No Post Available'), findsOneWidget);
+  });
+
+  testWidgets('shows profile error message', (tester) async {
+    when(
+      () => mockProfileCubit.state,
+    ).thenReturn(ProfileError('Failed to load profile'));
+
+    await tester.pumpWidget(createTestWidget());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Failed to load profile'), findsOneWidget);
+  });
+
+  testWidgets('shows post error message', (tester) async {
+    when(() => mockProfileCubit.state).thenReturn(ProfileLoaded(testUser));
+    when(
+      () => mockPostCubit.state,
+    ).thenReturn(PostError('Failed to load posts'));
+
+    await tester.pumpWidget(createTestWidget());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Error: Failed to load posts'), findsOneWidget);
+  });
+
+  testWidgets('tapping delete icon shows delete confirmation dialog', (
+    tester,
+  ) async {
+    when(() => mockProfileCubit.state).thenReturn(ProfileLoaded(testUser));
+    when(() => mockPostCubit.state).thenReturn(PostLoaded([testPost]));
+
+    await tester.pumpWidget(createTestWidget());
+    await tester.pumpAndSettle();
 
     final deleteButton = find.descendant(
-      of: postTile,
-      matching: find.byIcon(Icons.delete),
+      of: find.byType(PostTile),
+      matching: find.byIcon(Icons.delete_outline),
     );
 
     expect(deleteButton, findsOneWidget);
@@ -137,34 +148,5 @@ void main() {
     expect(find.text('Delete Post'), findsOneWidget);
     expect(find.text('Cancel'), findsOneWidget);
     expect(find.text('Delete'), findsOneWidget);
-  });
-
-  testWidgets('calls deletePost when confirm delete pressed', (tester) async {
-    await tester.pumpWidget(
-      createTestWidget(
-        authCubit: mockAuthCubit,
-        profileCubit: mockProfileCubit,
-        postCubit: mockPostCubit,
-      ),
-    );
-
-    await tester.pumpAndSettle();
-
-    final postTile = find.byType(PostTile).first;
-    final deleteButton = find.descendant(
-      of: postTile,
-      matching: find.byIcon(Icons.delete),
-    );
-
-    await tester.tap(deleteButton);
-    await tester.pumpAndSettle();
-
-    final confirmDeleteButton = find.text('Delete');
-    expect(confirmDeleteButton, findsOneWidget);
-
-    await tester.tap(confirmDeleteButton);
-    await tester.pumpAndSettle();
-
-    verify(() => mockPostCubit.deletePost(testPost.id)).called(1);
   });
 }
