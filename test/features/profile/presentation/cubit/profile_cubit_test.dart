@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:devgram/features/profile/domain/entities/profile_user.dart';
 import 'package:devgram/features/profile/domain/repo/profile_repo.dart';
@@ -26,8 +28,8 @@ class TestProfileCubit extends ProfileCubit {
   ) : super(profileRepo, storageRepo);
 
   @override
-  Future<String?> uploadImageToImgBB(String imagePath) async {
-    return imgBBUploader.uploadImageFile(imagePath);
+  Future<String?> uploadImageToImgBB(Uint8List imageBytes) async {
+    return imgBBUploader.uploadImageFile(imageBytes);
   }
 }
 
@@ -116,7 +118,9 @@ void main() {
         ).thenAnswer((_) async => testProfileUser);
 
         when(
-          () => mockImgBBUploader.uploadImageFile('path/to/image.png'),
+          () => mockImgBBUploader.uploadImageFile(
+            Uint8List.fromList([1, 2, 3, 4, 5]),
+          ),
         ).thenAnswer((_) async => 'http://image.url/uploaded.png');
 
         when(
@@ -134,8 +138,11 @@ void main() {
 
         return testProfileCubit;
       },
-      act: (cubit) =>
-          cubit.updateProfile('user123', 'New bio', 'path/to/image.png'),
+      act: (cubit) => cubit.updateProfile(
+        'user123',
+        'New bio',
+        Uint8List.fromList([1, 2, 3, 4, 5]),
+      ),
       expect: () => [
         ProfileLoading(),
         ProfileLoaded(
@@ -155,7 +162,11 @@ void main() {
         ).thenAnswer((_) async => null);
         return testProfileCubit;
       },
-      act: (cubit) => cubit.updateProfile('user123', 'New bio', ''),
+      act: (cubit) => cubit.updateProfile(
+        'user123',
+        'New bio',
+        Uint8List.fromList([1, 2, 3, 4, 5]),
+      ),
       expect: () => [
         ProfileLoading(),
         ProfileError("Failed to fetch user profile"),
@@ -172,12 +183,18 @@ void main() {
           () => mockProfileRepo.updateProfile(any()),
         ).thenThrow(Exception('update error'));
         when(
-          () => mockImgBBUploader.uploadImageFile(''),
+          () => mockImgBBUploader.uploadImageFile(
+            Uint8List.fromList([1, 2, 3, 4, 5]),
+          ),
         ).thenAnswer((_) async => '');
 
         return testProfileCubit;
       },
-      act: (cubit) => cubit.updateProfile('user123', 'New bio', ''),
+      act: (cubit) => cubit.updateProfile(
+        'user123',
+        'New bio',
+        Uint8List.fromList([1, 2, 3, 4, 5]),
+      ),
       expect: () => [ProfileLoading(), isA<ProfileError>()],
     );
   });
